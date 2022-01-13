@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
+const rateLimit = require('express-rate-limit')
 require('dotenv').config()
 
 const Sauce = require('./models/sauce')
@@ -24,6 +25,14 @@ app.use((req, res, next) => {
   next()
 })
 
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
+
+app.use(limiter)
 app.use(express.json())
 
 app.use('/images', express.static(path.join(__dirname, 'images')))
