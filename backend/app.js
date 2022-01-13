@@ -2,7 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
 const rateLimit = require('express-rate-limit')
-const helmet = require("helmet");
+const helmet = require("helmet")
 require('dotenv').config()
 
 const Sauce = require('./models/sauce')
@@ -34,7 +34,7 @@ const limiter = rateLimit({
 })
 
 app.use(limiter)
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }))
 app.use(express.json())
 
 app.use('/images', express.static(path.join(__dirname, 'images')))
