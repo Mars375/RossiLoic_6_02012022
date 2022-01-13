@@ -1,32 +1,34 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const zxcvbn = require('zxcvbn')
+const CryptoJS = require('crypto-js')
 
 const User = require('../models/User')
 
 exports.signup = (req, res, next) => {
-  if(zxcvbn(req.body.password).score >= 2)
-  {
-  bcrypt.hash(req.body.password, 10)
+  const cryptemail = CryptoJS.SHA256(req.body.email, 'secret key 123').toString()
+  const passwordSecure = zxcvbn(req.body.password)
+  if(passwordSecure.score >= 2) {
+    bcrypt.hash(req.body.password, 10)
     .then(hash => {
       const user = new User({
-        email: req.body.email,
+        email: cryptemail,
         password: hash
       })
       user.save()
         .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
-        .catch(error => res.status(400).json({ error, message: 'Une erreur est survenue' }))
+        .catch(error => res.status(400).json({ error, message: 'Cette adresse mail est déjà utilisé' }))
     })
     .catch(error => res.status(500).json({ error }))
   }
   else {
-    console.log('pouet');
-    return res.status(401).json({ message: 'Mot de passe pas assez sécurisé' })
+    return res.status(401).json({ message: passwordSecure.feedback.warning + "\n" + passwordSecure.feedback.suggestions })
   }
 }
 
 exports.login = (req, res, next) => {
-  User.findOne({ email: req.body.email })
+  const cryptemail = CryptoJS.SHA256(req.body.email, 'secret key 123').toString()
+  User.findOne({ email: cryptemail })
     .then(user => {
       if (!user) {
         return res.status(401).json({ error: 'Utilisateur non trouvé !' })
