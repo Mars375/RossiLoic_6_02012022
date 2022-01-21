@@ -2,11 +2,12 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const zxcvbn = require('zxcvbn')
 const CryptoJS = require('crypto-js')
+require('dotenv').config()
 
 const User = require('../models/User')
 
 exports.signup = (req, res, next) => {
-  const cryptemail = CryptoJS.SHA256(req.body.email, 'secret key 123').toString()
+  const cryptemail = CryptoJS.SHA256(req.body.email, process.env.SECRET_KEY).toString()
   const passwordSecure = zxcvbn(req.body.password)
   if(passwordSecure.score >= 2) {
     bcrypt.hash(req.body.password, 10)
@@ -27,7 +28,7 @@ exports.signup = (req, res, next) => {
 }
 
 exports.login = (req, res, next) => {
-  const cryptemail = CryptoJS.SHA256(req.body.email, 'secret key 123').toString()
+  const cryptemail = CryptoJS.SHA256(req.body.email, process.env.SECRET_KEY).toString()
   User.findOne({ email: cryptemail })
     .then(user => {
       if (!user) {
@@ -42,7 +43,7 @@ exports.login = (req, res, next) => {
             userId: user._id,
             token: jwt.sign(
               { userId: user._id },
-              'RANDOM_TOKEN_SECRET',
+              process.env.SECRET_TOKEN,
               { expiresIn: '24h' }
             )
           })

@@ -1,6 +1,7 @@
 const fs = require('fs')
 const Sauce = require('../models/sauce')
 const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce)
@@ -152,7 +153,7 @@ exports.likeDislike = async (req, res, next) => {
 const isCreator = async (req, res) => {
   try {
     const token = req.headers.authorization.split(' ')[1]
-    const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET')
+    const decodedToken = jwt.verify(token, process.env.SECRET_TOKEN)
     var userId = decodedToken.userId
   }
   catch{
